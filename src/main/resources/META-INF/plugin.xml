@@ -1,0 +1,47 @@
+<idea-plugin>
+    <id>slanglsp</id>
+
+    <name>Unofficial-Slang-LSP</name>
+
+    <vendor email="aglasroth@gmail.com">16-Bit-Dog</vendor>
+
+    <description>
+        <![CDATA[
+        <p>[Unofficial] Slang LSP is a plugin that provides Slang language support for IntelliJ platforms.</p>
+        ]]>
+    </description>
+
+    <change-notes><![CDATA[
+    ]]>
+    </change-notes>
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.redhat.devtools.lsp4ij</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <codeInsight.parameterInfo
+                language="Slang"
+                implementationClass="com.redhat.devtools.lsp4ij.features.signatureHelp.LSPParameterInfoHandler"/>
+
+        <lang.psiStructureViewFactory language="Slang"
+                                      implementationClass="com.redhat.devtools.lsp4ij.features.documentSymbol.LSPDocumentSymbolStructureViewFactory"/>
+
+        <notificationGroup id="Slang LSP"
+                           displayType="BALLOON"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="com.redhat.devtools.lsp4ij">
+        <server id="slangLanguageServer"
+                name="Slang Language Server"
+                factoryClass="slanglsp.SlangLanguageServerFactory">
+            <description><![CDATA[
+        Slang Language Server.
+        ]]>
+            </description>
+        </server>
+
+        <fileNamePatternMapping patterns="*.slang"
+                                serverId="slangLanguageServer"
+                                languageId="slang"/>
+    </extensions>
+
+</idea-plugin>
