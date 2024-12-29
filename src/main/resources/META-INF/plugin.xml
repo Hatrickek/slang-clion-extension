@@ -1,13 +1,14 @@
 <idea-plugin>
     <id>slanglsp</id>
 
-    <name>Unofficial-Slang-LSP</name>
+    <name>Slang [Unofficial]</name>
 
     <vendor email="aglasroth@gmail.com">16-Bit-Dog</vendor>
 
     <description>
         <![CDATA[
-        <p>[Unofficial] Slang LSP is a plugin that provides Slang language support for IntelliJ platforms.</p>
+        <p>Slang [Unofficial] is a plugin that provides Slang language support for IntelliJ platforms. This plugin is not an official Slang plugin.</p>
+        <p>To use this plugin have the latest vulkan-sdk inside your PATH (this program searches for slangd/slangd.exe within the path).</p>
         ]]>
     </description>
 
