@@ -254,7 +254,6 @@ class SlangLanguageServer extends ProcessStreamConnectionProvider
     }
 }
 
-// enabling the semanticTokens plugin is required for semantic tokens support
 class SlangLanguageClient extends LanguageClientImpl
     {
     Project project;

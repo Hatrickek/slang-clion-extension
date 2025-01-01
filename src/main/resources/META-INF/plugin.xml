@@ -8,7 +8,7 @@
     <description>
         <![CDATA[
         <p>Slang [Unofficial] is a plugin that provides Slang language support for IntelliJ platforms. This plugin is not an official Slang plugin.</p>
-        <p>To use this plugin have the latest vulkan-sdk inside your PATH (this program searches for slangd/slangd.exe within the path).</p>
+        <p>To use this plugin it is preferable to add `$VK_SDK_PATH/bin` to your `PATH` environment variable </p>
         ]]>
     </description>
 
@@ -28,10 +28,20 @@
 
         <notificationGroup id="Slang LSP"
                            displayType="BALLOON"/>
+
+        <projectConfigurable
+                parentId="tools"
+                instance="slanglsp.SlangConfigurable"
+                id="slanglsp.SlangConfigurable"
+                displayName="Slang"
+                nonDefaultProject="true"/>
+
+        <projectService 
+                serviceImplementation="slanglsp.SlangPersistentStateConfig"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.redhat.devtools.lsp4ij">
-        <server id="slangLanguageServer"
+        <server id="slanglsp.SlangLanguageServer"
                 name="Slang Language Server"
                 factoryClass="slanglsp.SlangLanguageServerFactory">
             <description><![CDATA[
@@ -41,7 +51,7 @@
         </server>
 
         <fileNamePatternMapping patterns="*.slang"
-                                serverId="slangLanguageServer"
+                                serverId="slanglsp.SlangLanguageServer"
                                 languageId="slang"/>
     </extensions>
 
