@@ -22,8 +22,9 @@ public class SlangConfigurableGUI {
     private JButton predefinedMacrosButton;
     private JPanel additionalIncludePathsContainer;
     private JPanel predefinedMacrosContainer;
-    private JComboBox traceServer;
     private JComboBox enableCommitCharactersInAutoCompletion;
+    private JLabel seperatorLabel1;
+    private JLabel seperatorLabel0;
 
     JPanel getRootPanel()
     {
@@ -69,7 +70,6 @@ public class SlangConfigurableGUI {
 
         state.explicitSlangdLocation = explicitSlangdLocation.getText();
 
-        state.traceServer = (String)traceServer.getSelectedItem();
         state.enableCommitCharactersInAutoCompletion = (String)enableCommitCharactersInAutoCompletion.getSelectedItem();
 
         state.enableInlayHintsForDeducedTypes = enableInlayHintsForDeducedTypes.isSelected();
@@ -86,7 +86,6 @@ public class SlangConfigurableGUI {
 
         explicitSlangdLocation.setText(state.explicitSlangdLocation);
 
-        traceServer.setSelectedItem(state.traceServer);
         enableCommitCharactersInAutoCompletion.setSelectedItem(state.enableCommitCharactersInAutoCompletion);
 
         enableInlayHintsForDeducedTypes.setSelected(state.enableInlayHintsForDeducedTypes);

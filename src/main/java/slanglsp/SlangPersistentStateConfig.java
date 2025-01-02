@@ -33,7 +33,7 @@ class SlangPersistentStateConfig implements PersistentStateComponent<SlangPersis
         public List<String> predefinedMacros = List.of("__EXAMPLE_MACRO1", "__EXAMPLE_MACRO2=VALUE");
 
         public String explicitSlangdLocation = "";
-        public String traceServer = "messages";
+//        public String traceServer = "off"; // handled by LSP4IJ's (runtime) debug tool
         public String enableCommitCharactersInAutoCompletion = "membersOnly";
 
         public Boolean enableInlayHintsForDeducedTypes = true;
@@ -45,7 +45,6 @@ class SlangPersistentStateConfig implements PersistentStateComponent<SlangPersis
             additionalIncludePaths = otherState.additionalIncludePaths;
             predefinedMacros = otherState.predefinedMacros;
             explicitSlangdLocation = otherState.explicitSlangdLocation;
-            traceServer = otherState.traceServer;
             enableCommitCharactersInAutoCompletion = otherState.enableCommitCharactersInAutoCompletion;
             enableInlayHintsForDeducedTypes = otherState.enableInlayHintsForDeducedTypes;
             enableInlayHintsForParameterNames = otherState.enableInlayHintsForParameterNames;
@@ -57,7 +56,6 @@ class SlangPersistentStateConfig implements PersistentStateComponent<SlangPersis
                 && additionalIncludePaths.equals(other.additionalIncludePaths)
                 && predefinedMacros.equals(other.predefinedMacros)
                 && explicitSlangdLocation.equals(other.explicitSlangdLocation)
-                && traceServer.equals(other.traceServer)
                 && enableCommitCharactersInAutoCompletion.equals(other.enableCommitCharactersInAutoCompletion)
                 && enableInlayHintsForDeducedTypes.equals(other.enableInlayHintsForDeducedTypes)
                 && enableInlayHintsForParameterNames.equals(other.enableInlayHintsForParameterNames)
@@ -77,10 +75,6 @@ class SlangPersistentStateConfig implements PersistentStateComponent<SlangPersis
             String predefinedMacrosKey = "slang.predefinedMacros";
             String predefinedMacrosJson = gson.toJson(predefinedMacros);
             stringMap.put(predefinedMacrosKey, predefinedMacrosJson);
-
-            String traceServerKey = "slangLanguageServer.trace.server";
-            String traceServerJson = gson.toJson(traceServer);
-            stringMap.put(traceServerKey, traceServerJson);
 
             String enableCommitCharactersInAutoCompletionKey = "slang.enableCommitCharactersInAutoCompletion";
             String enableCommitCharactersInAutoCompletionJson = gson.toJson(enableCommitCharactersInAutoCompletion);
