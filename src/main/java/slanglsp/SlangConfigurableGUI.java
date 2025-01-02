@@ -2,16 +2,12 @@ package slanglsp;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
-import com.intellij.uiDesigner.core.GridConstraints;
 
 import java.awt.GridBagConstraints;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.util.List;
 import java.util.Vector;
 
 public class SlangConfigurableGUI {
@@ -26,13 +22,15 @@ public class SlangConfigurableGUI {
     private JButton predefinedMacrosButton;
     private JPanel additionalIncludePathsContainer;
     private JPanel predefinedMacrosContainer;
+    private JComboBox traceServer;
+    private JComboBox enableCommitCharactersInAutoCompletion;
 
     JPanel getRootPanel()
     {
         return root;
     }
 
-    Vector<JTextField> convertStringListIntoTextFieldVector(Vector<String> stringList)
+    Vector<JTextField> convertStringListIntoTextFieldVector(java.util.List<String> stringList)
     {
         Vector<JTextField> textFieldList = new Vector<>();
         textFieldList.setSize(stringList.size());
@@ -68,11 +66,36 @@ public class SlangConfigurableGUI {
         SlangPersistentStateConfig.State state = new SlangPersistentStateConfig.State();
         state.additionalIncludePaths = getStringListFromPanelOwnedTextFields(additionalIncludePathsContainer);
         state.predefinedMacros = getStringListFromPanelOwnedTextFields(predefinedMacrosContainer);
+
         state.explicitSlangdLocation = explicitSlangdLocation.getText();
+
+        state.traceServer = (String)traceServer.getSelectedItem();
+        state.enableCommitCharactersInAutoCompletion = (String)enableCommitCharactersInAutoCompletion.getSelectedItem();
+
         state.enableInlayHintsForDeducedTypes = enableInlayHintsForDeducedTypes.isSelected();
         state.enableInlayHintsForParameterNames = enableInlayHintsForParameterNames.isSelected();
         state.enableSearchingSubDirectoriesOfWorkspace = enableSearchingSubDirectoriesOfWorkspace.isSelected();
+
         return state;
+    }
+
+    void setGUIStateWithState(SlangPersistentStateConfig.State state)
+    {
+        setPanelContentToListOfObjects(additionalIncludePathsContainer, convertStringListIntoTextFieldVector(state.additionalIncludePaths));
+        setPanelContentToListOfObjects(predefinedMacrosContainer, convertStringListIntoTextFieldVector(state.predefinedMacros));
+
+        explicitSlangdLocation.setText(state.explicitSlangdLocation);
+
+        traceServer.setSelectedItem(state.traceServer);
+        enableCommitCharactersInAutoCompletion.setSelectedItem(state.enableCommitCharactersInAutoCompletion);
+
+        enableInlayHintsForDeducedTypes.setSelected(state.enableInlayHintsForDeducedTypes);
+        enableInlayHintsForParameterNames.setSelected(state.enableInlayHintsForParameterNames);
+        enableSearchingSubDirectoriesOfWorkspace.setSelected(state.enableSearchingSubDirectoriesOfWorkspace);
+
+        root.revalidate();
+        root.repaint();
+        root.updateUI();
     }
 
     void addTextFieldToPanel(JPanel panel, JTextField field)
@@ -109,23 +132,12 @@ public class SlangConfigurableGUI {
         }
     }
 
-    void setGUIStateWithState(SlangPersistentStateConfig.State state)
-    {
-        setPanelContentToListOfObjects(additionalIncludePathsContainer, convertStringListIntoTextFieldVector(state.additionalIncludePaths));
-        setPanelContentToListOfObjects(predefinedMacrosContainer, convertStringListIntoTextFieldVector(state.predefinedMacros));
-        explicitSlangdLocation.setText(state.explicitSlangdLocation);
-        enableInlayHintsForDeducedTypes.setSelected(state.enableInlayHintsForDeducedTypes);
-        enableInlayHintsForParameterNames.setSelected(state.enableInlayHintsForParameterNames);
-        enableSearchingSubDirectoriesOfWorkspace.setSelected(state.enableSearchingSubDirectoriesOfWorkspace);
-
-        root.revalidate();
-        root.repaint();
-        root.updateUI();
-    }
-
     public void apply()
     {
         mConfig.setState(this.deriveStateFromGUI());
+
+        for(var i : SlangLanguageClient.maybeAliveClients)
+            i.triggerChangeConfiguration();
     }
 
     SlangPersistentStateConfig.State resetState = null;

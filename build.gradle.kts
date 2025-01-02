@@ -35,7 +35,7 @@ dependencies {
         bundledPlugin("org.jetbrains.plugins.textmate")
         plugin("com.redhat.devtools.lsp4ij:0.9.0")
     }
-
+    implementation("com.google.code.gson:gson:2.11.0")
 }
 
 fun getResourcesFolder(): String

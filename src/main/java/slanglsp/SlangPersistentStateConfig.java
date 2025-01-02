@@ -1,19 +1,21 @@
 package slanglsp;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 
 import com.intellij.util.xmlb.Converter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.google.gson.*;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+
+import javax.print.DocFlavor;
+import java.io.*;
 
 
 @State(
@@ -26,47 +28,107 @@ class SlangPersistentStateConfig implements PersistentStateComponent<SlangPersis
 {
     static class State
     {
-        public Vector<String> additionalIncludePaths = new Vector<>();
-        public Vector<String> predefinedMacros = new Vector<>(List.of("__EXAMPLE_MACRO1", "__EXAMPLE_MACRO2=VALUE"));
+        // TODO: make a cached state which transforms this State into an efficent to compare state (assumes rare to change settings)
+        public List<String> additionalIncludePaths = new ArrayList<>();
+        public List<String> predefinedMacros = List.of("__EXAMPLE_MACRO1", "__EXAMPLE_MACRO2=VALUE");
+
         public String explicitSlangdLocation = "";
+        public String traceServer = "messages";
+        public String enableCommitCharactersInAutoCompletion = "membersOnly";
+
         public Boolean enableInlayHintsForDeducedTypes = true;
         public Boolean enableInlayHintsForParameterNames = true;
         public Boolean enableSearchingSubDirectoriesOfWorkspace = true;
 
+        public void copyValues(State otherState)
+        {
+            additionalIncludePaths = otherState.additionalIncludePaths;
+            predefinedMacros = otherState.predefinedMacros;
+            explicitSlangdLocation = otherState.explicitSlangdLocation;
+            traceServer = otherState.traceServer;
+            enableCommitCharactersInAutoCompletion = otherState.enableCommitCharactersInAutoCompletion;
+            enableInlayHintsForDeducedTypes = otherState.enableInlayHintsForDeducedTypes;
+            enableInlayHintsForParameterNames = otherState.enableInlayHintsForParameterNames;
+            enableSearchingSubDirectoriesOfWorkspace = otherState.enableSearchingSubDirectoriesOfWorkspace;
+        }
         public boolean equals(State other)
         {
             return true
                 && additionalIncludePaths.equals(other.additionalIncludePaths)
                 && predefinedMacros.equals(other.predefinedMacros)
                 && explicitSlangdLocation.equals(other.explicitSlangdLocation)
+                && traceServer.equals(other.traceServer)
+                && enableCommitCharactersInAutoCompletion.equals(other.enableCommitCharactersInAutoCompletion)
                 && enableInlayHintsForDeducedTypes.equals(other.enableInlayHintsForDeducedTypes)
                 && enableInlayHintsForParameterNames.equals(other.enableInlayHintsForParameterNames)
                 && enableSearchingSubDirectoriesOfWorkspace.equals(other.enableSearchingSubDirectoriesOfWorkspace)
                 ;
         }
+
+        Object createJSONFromObject()
+        {
+            Gson gson = new Gson();
+            Map<String, String> stringMap = new HashMap<>();
+
+            String additionalIncludePathsKey = "slang.additionalSearchPaths";
+            String additionalIncludePathsJson = gson.toJson(additionalIncludePaths);
+            stringMap.put(additionalIncludePathsKey, additionalIncludePathsJson);
+
+            String predefinedMacrosKey = "slang.predefinedMacros";
+            String predefinedMacrosJson = gson.toJson(predefinedMacros);
+            stringMap.put(predefinedMacrosKey, predefinedMacrosJson);
+
+            String traceServerKey = "slangLanguageServer.trace.server";
+            String traceServerJson = gson.toJson(traceServer);
+            stringMap.put(traceServerKey, traceServerJson);
+
+            String enableCommitCharactersInAutoCompletionKey = "slang.enableCommitCharactersInAutoCompletion";
+            String enableCommitCharactersInAutoCompletionJson = gson.toJson(enableCommitCharactersInAutoCompletion);
+            stringMap.put(enableCommitCharactersInAutoCompletionKey, enableCommitCharactersInAutoCompletionJson);
+
+            String enableInlayHintsForDeducedTypesKey = "slang.inlayHints.deducedTypes";
+            String enableInlayHintsForDeducedTypesJson = gson.toJson(enableInlayHintsForDeducedTypes);
+            stringMap.put(enableInlayHintsForDeducedTypesKey, enableInlayHintsForDeducedTypesJson);
+
+            String enableInlayHintsForParameterNamesKey = "slang.inlayHints.parameterNames";
+            String enableInlayHintsForParameterNamesJson = gson.toJson(enableInlayHintsForParameterNames);
+            stringMap.put(enableInlayHintsForParameterNamesKey, enableInlayHintsForParameterNamesJson);
+
+            String enableSearchingSubDirectoriesOfWorkspaceKey = "slang.searchInAllWorkspaceDirectories";
+            String enableSearchingSubDirectoriesOfWorkspaceJson = gson.toJson(enableSearchingSubDirectoriesOfWorkspace);
+            stringMap.put(enableSearchingSubDirectoriesOfWorkspaceKey, enableSearchingSubDirectoriesOfWorkspaceJson);
+
+            return gson.toJson(stringMap);
+        }
     }
 
+    @NotNull
     private State state = new State();
+
+    Object createJSONFromObject()
+    {
+        return state.createJSONFromObject();
+    }
+
+    String getExplicitSlangdLocation()
+    {
+        return state.explicitSlangdLocation;
+    }
 
     void setState(State otherState)
     {
-        state.additionalIncludePaths = otherState.additionalIncludePaths;
-        state.predefinedMacros = otherState.predefinedMacros;
-        state.explicitSlangdLocation = otherState.explicitSlangdLocation;
-        state.enableInlayHintsForDeducedTypes = otherState.enableInlayHintsForDeducedTypes;
-        state.enableInlayHintsForParameterNames = otherState.enableInlayHintsForParameterNames;
-        state.enableSearchingSubDirectoriesOfWorkspace = otherState.enableSearchingSubDirectoriesOfWorkspace;
+        state.copyValues(otherState);
     }
 
-    @Nullable
+    @NotNull
     @Override
     public State getState()
     {
-        return this.state;
+        return state;
     }
 
     @Override
-    public void loadState(State config)
+    public void loadState(@NotNull State config)
     {
         state = config;
     }

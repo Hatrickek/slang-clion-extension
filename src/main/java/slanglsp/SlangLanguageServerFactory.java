@@ -18,13 +18,11 @@ import org.jetbrains.plugins.textmate.TextMateService;
 
 import java.io.*;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.*;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.concurrent.LinkedBlockingDeque;
 
 public class SlangLanguageServerFactory implements LanguageServerFactory
 {
@@ -203,9 +201,36 @@ public class SlangLanguageServerFactory implements LanguageServerFactory
     }
 };
 
-    
 class SlangLanguageServer extends ProcessStreamConnectionProvider
 {
+    Project project;
+    SlangLanguageServer(Project project)
+    {
+        this.project = project;
+
+        // First try to get EXE from the project settings
+        var exePath = findExecutableUsingExplicitSlangdLocation();
+        if(exePath.isEmpty())
+        {
+            // Next try to get EXE from PATH
+            exePath = findExecutableInPATH();
+        }
+        if (exePath.isPresent())
+        {
+            super.setCommands(List.of(exePath.get(), ""));
+            super.setWorkingDirectory(project.getBasePath());
+        }
+        else
+        {
+            NotificationGroupManager.getInstance().getNotificationGroup("Slang LSP").createNotification(
+                "Slang LSP",
+                "Slang Language Server not found. Make sure it is installed properly (and is available in PATH), and restart the IDE.",
+                NotificationType.ERROR
+            ).notify(project);
+            LanguageServerManager.getInstance(project).stop("slangLanguageServer");
+        }
+    }
+
     static String getLspExeName()
     {
         if (SystemInfo.isWindows)
@@ -220,6 +245,18 @@ class SlangLanguageServer extends ProcessStreamConnectionProvider
             return dir.canExecute() && name.contentEquals(getLspExeName());
         }
     }
+
+    private Optional<String> findExecutableUsingExplicitSlangdLocation()
+    {
+        var dirFiles = Paths.get(SlangPersistentStateConfig.getInstance(project).getExplicitSlangdLocation()).toFile().listFiles(new FindLspExeFilter());
+
+        if(dirFiles == null)
+            return Optional.empty();
+        for(var i : dirFiles)
+            return Optional.of(i.getAbsolutePath());
+        return Optional.empty();
+    }
+
     private Optional<String> findExecutableInPATH()
     {
         String[] paths = EnvironmentUtil.getValue("PATH").split(File.pathSeparator);
@@ -233,43 +270,40 @@ class SlangLanguageServer extends ProcessStreamConnectionProvider
         }
         return Optional.empty();
     }
-
-    Project project;
-    SlangLanguageServer(Project project)
-    {
-        this.project = project;
-        var exePath = findExecutableInPATH();
-        if (exePath.isPresent())
-        {
-            super.setCommands(List.of(exePath.get(), ""));
-            super.setWorkingDirectory(project.getBasePath());
-        } else {
-            NotificationGroupManager.getInstance().getNotificationGroup("Slang LSP").createNotification(
-                "Slang LSP",
-                "Slang Language Server not found. Make sure it is installed properly (and is available in PATH), and restart the IDE.",
-                NotificationType.ERROR
-            ).notify(project);
-            LanguageServerManager.getInstance(project).stop("slangLanguageServer");
-        }
-    }
 }
 
 class SlangLanguageClient extends LanguageClientImpl
-    {
+{
+    static LinkedBlockingDeque<SlangLanguageClient> maybeAliveClients = new LinkedBlockingDeque<>();
+
     Project project;
     SlangLanguageClient(Project project)
     {
         super(project);
         this.project = project;
+        maybeAliveClients.add(this);
     }
+
     public Object createSettings()
     {
-        return Map.of("slang", Map.of("plugin", Map.of("semanticTokens", Map.of("globalOn", true))));
+        var state = SlangPersistentStateConfig.getInstance(project).getState();
+        return state.createJSONFromObject();
     }
+
+    public void triggerChangeConfiguration()
+    {
+        super.triggerChangeConfiguration();
+    }
+
     public void handleServerStatusChanged(ServerStatus serverStatus)
     {
-        if (serverStatus == ServerStatus.started) {
+        if (serverStatus == ServerStatus.started)
+        {
             triggerChangeConfiguration();
+        }
+        if(serverStatus == ServerStatus.stopped)
+        {
+            maybeAliveClients.remove(this);
         }
     }
 }
