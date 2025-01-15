@@ -85,7 +85,7 @@ public class SlangLanguageServerFactory implements LanguageServerFactory
         // If cache version != current version, return true
         try
         {
-            SlangVersion cachedVersion = new SlangVersion(versionCacheFile.toURL().openStream());
+            SlangVersion cachedVersion = new SlangVersion(versionCacheFile.toURI().toURL().openStream());
             if(!cachedVersion.equals(SlangUtils.getVersion()))
                 return true;
         }

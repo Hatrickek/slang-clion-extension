@@ -131,6 +131,6 @@ class SlangPersistentStateConfig implements PersistentStateComponent<SlangPersis
     @Nullable
     public static SlangPersistentStateConfig getInstance(Project project)
     {
-        return ServiceManager.getService(project, SlangPersistentStateConfig.class);
+        return project.getService(SlangPersistentStateConfig.class);
     }
 }
