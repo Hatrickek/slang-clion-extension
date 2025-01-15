@@ -224,7 +224,7 @@ class SlangLanguageServer extends ProcessStreamConnectionProvider
         {
             NotificationGroupManager.getInstance().getNotificationGroup("Slang LSP").createNotification(
                 "Slang LSP",
-                "`slangd`/`slangd.exe` was not found in the PATH enviroment variable. It is preferable to add (once the latest vulkan SDK is insalled) `$VK_SDK_PATH/bin` to your `PATH` environment variable, then restart the IDE.",
+                "`slangd`/`slangd.exe` was not found in the `PATH` environment variable. It is preferable to add (once the latest vulkan SDK is installed) `$VK_SDK_PATH/bin` to your `PATH` environment variable, then restart this IDE.",
                 NotificationType.ERROR
             ).notify(project);
             LanguageServerManager.getInstance(project).stop("slangLanguageServer");
