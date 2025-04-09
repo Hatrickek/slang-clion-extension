@@ -4,7 +4,7 @@ import java.nio.file.Paths
 import java.util.zip.*
 import kotlin.io.path.absolute
 
-fun getProjectVersion():String = "0.0.3"
+fun getProjectVersion():String = "0.0.4"
 project.version = getProjectVersion()
 group = "slang"
 
@@ -85,13 +85,7 @@ fun mandatoryTasks()
 }
 
 tasks {
-
     mandatoryTasks()
-
-    patchPluginXml  {
-        sinceBuild.set("232")
-        untilBuild.unset()
-    }
 
     withType<JavaCompile> {
         sourceCompatibility = "17"
@@ -119,6 +113,12 @@ tasks {
 }
 
 intellijPlatform {
+    pluginConfiguration {
+        ideaVersion {
+            sinceBuild = "232.0"
+            untilBuild = provider { null }
+        }
+    }
     pluginVerification {
         ides {
             ide(IntelliJPlatformType.IntellijIdeaCommunity, "2023.3.6")
