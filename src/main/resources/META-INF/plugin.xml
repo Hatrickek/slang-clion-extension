@@ -50,7 +50,7 @@
             </description>
         </server>
 
-        <fileNamePatternMapping patterns="*.slang"
+        <fileNamePatternMapping patterns="*.slang;*.hlsl;*.hlsli"
                                 serverId="slanglsp.SlangLanguageServer"
                                 languageId="slang"/>
     </extensions>

@@ -1,5 +1,7 @@
 ### This is an unofficial LSP for Slang to use with jetbrain IDEs.
 
+Added .hlsl and .hlsli extension support.
+
 ---
 
 ### Example
